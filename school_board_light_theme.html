@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة المدرسة - الثيم الفاتح</title>
+<!-- استيراد خط Cairo من Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-color: #fdfdf7; /* خلفية فاتحة مائلة للكريمي */
+    --moe-green: #006C35; /* لون الوزارة الأخضر */
+    --gold-accent: #c5a059; /* لون ذهبي هادئ للفاصل */
+    --card-bg-green: #f0f7f4; /* خلفية بطاقة خضراء فاتحة */
+    --card-bg-gold: #fdf8eb; /* خلفية بطاقة ذهبية فاتحة */
+    --text-dark: #1a4d32; /* لون نص أخضر غامق */
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Cairo', sans-serif;
+    background-color: var(--bg-color);
+    /* إضافة لمسة فنية في الأسفل مثل الصورة */
+    background-image: radial-gradient(circle at bottom, #e2eee6 0%, transparent 40%);
+    color: var(--text-dark);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 16px;
+    gap: 12px;
+  }
+
+  /* ── شعار المدرسة ── */
+  .logo-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .school-logo {
+    width: 120px;
+    height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .school-logo img {
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .school-name {
+    font-size: 24px;
+    font-weight: 800;
+    text-align: center;
+    color: var(--moe-green);
+    margin-top: 5px;
+  }
+
+  /* ── فاصل ذهبي ── */
+  .divider {
+    width: 100%;
+    height: 2px;
+    background-color: var(--gold-accent);
+    margin: 5px 0;
+  }
+
+  /* ── الساعة العقارب ── */
+  .clock-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+
+  canvas#analogClock {
+    display: block;
+  }
+
+  .digital-time {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text-dark);
+    font-variant-numeric: tabular-nums;
+    margin-top: 5px;
+  }
+
+  /* ── الحصة والبطاقات ── */
+  .card {
+    border-radius: 18px;
+    padding: 15px 20px;
+    width: 100%;
+    text-align: center;
+    border: 1px solid rgba(0,0,0,0.05);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+  }
+
+  /* بطاقة الحصة الحالية (خضراء) */
+  .card.period-card {
+    background-color: var(--card-bg-green);
+    border: 1.5px solid #d0e5da;
+  }
+
+  /* بطاقة الوقت المتبقي (ذهبية) */
+  .card.remaining-card {
+    background-color: var(--card-bg-gold);
+    border: 1.5px solid #f2e6c9;
+  }
+
+  /* بطاقات التاريخ (رمادية فاتحة/خضراء) */
+  .card.date-card {
+    background-color: #f4f7f6;
+    border: 1.5px solid #e0e9e5;
+  }
+
+  .card-label {
+    font-size: 13px;
+    color: var(--moe-green);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .card-value {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text-dark);
+  }
+
+  .period-time {
+    font-size: 14px;
+    color: #666;
+    margin-top: 4px;
+  }
+
+  /* ── الوقت المتبقي ── */
+  #remaining {
+    font-size: 42px;
+    font-weight: 800;
+    color: var(--text-dark);
+  }
+
+  #remaining.warn { color: #d4a017; }
+  #remaining.danger { color: #cc3300; }
+
+  /* ── التواريخ ── */
+  .dates-row {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .dates-row .card {
+    flex: 1;
+  }
+
+  /* زخرفة النباتات في الأسفل كما في الصورة */
+  .bottom-decoration {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 60px;
+    background-image: url('https://www.moe.gov.sa/_layouts/15/Portal/Images/footer-bg.png'); /* محاولة تقريبية */
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: bottom;
+    opacity: 0.3;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<!-- شعار واسم المدرسة -->
+<div class="logo-section">
+  <div class="school-logo">
+    <img src="https://upload.wikimedia.org/wikipedia/ar/1/17/Saudi_Ministry_of_Education_Logo_2025.png?_=20251102000021" alt="Logo">
+  </div>
+  <div class="school-name">ابتدائية الأحنف بن قيس</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- الساعة العقارب -->
+<div class="clock-section">
+  <canvas id="analogClock" width="180" height="180"></canvas>
+  <div class="digital-time" id="digitalTime">00:00:00</div>
+</div>
+
+<!-- الحصة الحالية -->
+<div class="card period-card">
+  <div class="card-label">الحصة الحالية</div>
+  <div class="card-value" id="periodName">—</div>
+  <div class="period-time" id="periodTime"></div>
+</div>
+
+<!-- الوقت المتبقي -->
+<div class="card remaining-card">
+  <div class="card-label">الوقت المتبقي</div>
+  <div id="remaining">--:--</div>
+</div>
+
+<!-- التواريخ -->
+<div class="dates-row">
+  <div class="card date-card">
+    <div class="card-label">التاريخ الهجري</div>
+    <div class="card-value" id="hijriDate">—</div>
+  </div>
+  <div class="card date-card">
+    <div class="card-label">التاريخ الميلادي</div>
+    <div class="card-value" id="gregorianDate">—</div>
+  </div>
+</div>
+
+<div class="bottom-decoration"></div>
+
+<script>
+const schedule = [
+  { name: "الطابور",      start: "07:00", end: "07:20" },
+  { name: "الحصة الأولى", start: "07:20", end: "08:00" },
+  { name: "الفسحة",       start: "08:00", end: "08:15" },
+  { name: "الحصة الثانية",start: "08:15", end: "08:55" },
+  { name: "الحصة الثالثة",start: "08:55", end: "09:35" },
+  { name: "الفسحة الكبرى",start: "09:35", end: "10:05" },
+  { name: "الحصة الرابعة",start: "10:05", end: "10:45" },
+  { name: "الحصة الخامسة",start: "10:45", end: "11:25" },
+  { name: "الحصة السادسة",start: "11:25", end: "12:05" },
+  { name: "انتهاء الدوام", start: "12:05", end: "23:59" },
+];
+
+function toMinutes(hhmm) {
+  const [h, m] = hhmm.split(":").map(Number);
+  return h * 60 + m;
+}
+
+function nowMinutes() {
+  const n = new Date();
+  return n.getHours() * 60 + n.getMinutes();
+}
+
+function getCurrentPeriod(now) {
+  for (const p of schedule) {
+    const s = toMinutes(p.start), e = toMinutes(p.end);
+    if (now >= s && now < e) return p;
+  }
+  return null;
+}
+
+function drawAnalogClock(canvas) {
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height;
+  const cx = W / 2, cy = H / 2, r = W / 2 - 8;
+  const now = new Date();
+  const sec = now.getSeconds(), min = now.getMinutes(), hr = now.getHours() % 12;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // إطار الساعة (أخضر كما في الصورة)
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+  ctx.strokeStyle = "#006C35";
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  // علامات الساعات
+  for (let i = 0; i < 12; i++) {
+    const a = (i / 12) * 2 * Math.PI - Math.PI / 2;
+    const isMajor = i % 3 === 0;
+    const r1 = r - (isMajor ? 15 : 10);
+    ctx.beginPath();
+    ctx.moveTo(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1);
+    ctx.lineTo(cx + Math.cos(a) * (r - 5), cy + Math.sin(a) * (r - 5));
+    ctx.strokeStyle = "#006C35";
+    ctx.lineWidth = isMajor ? 3 : 1.5;
+    ctx.stroke();
+  }
+
+  function drawHand(angle, length, width, color) {
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + Math.cos(angle) * length, cy + Math.sin(angle) * length);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.lineCap = "round";
+    ctx.stroke();
+  }
+
+  const hrAngle  = ((hr + min / 60) / 12) * 2 * Math.PI - Math.PI / 2;
+  const minAngle = ((min + sec / 60) / 60) * 2 * Math.PI - Math.PI / 2;
+  const secAngle = (sec / 60) * 2 * Math.PI - Math.PI / 2;
+
+  drawHand(hrAngle,  r * 0.50, 6, "#1a4d32"); // عقرب الساعة
+  drawHand(minAngle, r * 0.75, 4, "#1a4d32"); // عقرب الدقائق
+  drawHand(secAngle, r * 0.85, 2, "#c5a059"); // عقرب الثواني (ذهبي)
+
+  // مركز الساعة
+  ctx.beginPath();
+  ctx.arc(cx, cy, 6, 0, 2 * Math.PI);
+  ctx.fillStyle = "#c5a059";
+  ctx.fill();
+}
+
+function pad2(n) { return String(n).padStart(2, "0"); }
+
+function updateDigitalTime() {
+  const n = new Date();
+  document.getElementById("digitalTime").textContent =
+    `${pad2(n.getHours())}:${pad2(n.getMinutes())}:${pad2(n.getSeconds())}`;
+}
+
+function updatePeriod() {
+  const now = nowMinutes();
+  const period = getCurrentPeriod(now);
+  const remEl = document.getElementById("remaining");
+
+  if (!period) {
+    document.getElementById("periodName").textContent = "لا توجد حصة";
+    document.getElementById("periodTime").textContent = "";
+    remEl.textContent = "--:--";
+    return;
+  }
+
+  document.getElementById("periodName").textContent = period.name;
+  document.getElementById("periodTime").textContent =
+    `${period.start} – ${period.end}`;
+
+  const endMin = toMinutes(period.end);
+  const remaining = endMin - now;
+  const remSec = remaining * 60 - new Date().getSeconds();
+  const dispMin = Math.floor(remSec / 60);
+  const dispSec = remSec % 60;
+
+  if (remSec <= 0) {
+    remEl.textContent = "00:00";
+  } else {
+    remEl.textContent = `${pad2(dispMin)}:${pad2(dispSec)}`;
+  }
+}
+
+function updateDates() {
+  const now = new Date();
+  document.getElementById("gregorianDate").textContent =
+    now.toLocaleDateString("ar-SA", { day: "numeric", month: "long", year: "numeric" });
+  document.getElementById("hijriDate").textContent =
+    now.toLocaleDateString("ar-SA-u-ca-islamic", { day: "numeric", month: "long", year: "numeric" });
+}
+
+const canvas = document.getElementById("analogClock");
+function tick() {
+  drawAnalogClock(canvas);
+  updateDigitalTime();
+  updatePeriod();
+}
+
+updateDates();
+setInterval(updateDates, 60000);
+tick();
+setInterval(tick, 1000);
+</script>
+</body>
+</html>
